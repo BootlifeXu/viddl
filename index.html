@@ -67,36 +67,103 @@
     .refresh:hover {
       background-color: #c7c7c7;
     }
+    #status {
+      margin-top: 15px;
+      color: #666;
+      font-size: 14px;
+    }
+    .hidden {
+      display: none;
+    }
   </style>
 </head>
 <body>
-
   <div class="container">
     <h2>Video Downloader</h2>
-    <input type="text" id="videoUrl">
+    <input type="text" id="videoUrl" placeholder="Paste video URL here">
     <div>
       <button class="download" onclick="downloadVideo()">Download</button>
       <button class="refresh" onclick="location.reload()">Refresh</button>
     </div>
+    <p id="status" class="hidden">Starting download...</p>
+    <iframe id="downloadFrame" style="display:none;"></iframe>
   </div>
-
   <script>
     function downloadVideo() {
       const url = document.getElementById('videoUrl').value.trim();
-      if (!url) return alert("Please enter a video URL.");
-
-      const fileName = decodeURIComponent(url.split('/').pop());
-
-      // Create and click a hidden download link
-      const a = document.createElement('a');
-      a.href = url;
-      a.setAttribute('download', fileName);
-      a.setAttribute('style', 'display: none;');
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
+      if (!url) {
+        alert("Please enter a valid URL.");
+        return;
+      }
+      
+      // Extract filename from URL or use a default
+      let fileName = "download";
+      try {
+        // Try to get filename from the URL
+        const urlPath = new URL(url).pathname;
+        const lastSegment = urlPath.split('/').filter(segment => segment.length > 0).pop();
+        if (lastSegment) {
+          fileName = decodeURIComponent(lastSegment);
+        }
+      } catch (e) {
+        console.error("Error parsing URL:", e);
+      }
+      
+      // Show status
+      const status = document.getElementById('status');
+      status.textContent = "Starting download...";
+      status.classList.remove('hidden');
+      
+      // Force download using blob approach
+      fetch(url)
+        .then(response => {
+          if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
+          }
+          return response.blob();
+        })
+        .then(blob => {
+          // Create object URL for the blob
+          const blobUrl = URL.createObjectURL(blob);
+          
+          // Create and click a download link
+          const a = document.createElement('a');
+          a.href = blobUrl;
+          a.download = fileName;
+          a.style.display = 'none';
+          document.body.appendChild(a);
+          a.click();
+          
+          // Clean up
+          setTimeout(() => {
+            document.body.removeChild(a);
+            URL.revokeObjectURL(blobUrl);
+            status.textContent = "Download complete!";
+            setTimeout(() => status.classList.add('hidden'), 3000);
+          }, 100);
+        })
+        .catch(error => {
+          console.error("Download failed:", error);
+          
+          // Fallback method if fetch fails (CORS issues)
+          status.textContent = "Using fallback download method...";
+          
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = fileName; // Force download attribute
+          a.target = "_blank"; // Open in new tab if download doesn't work
+          a.rel = "noopener noreferrer";
+          a.style.display = 'none';
+          document.body.appendChild(a);
+          a.click();
+          
+          setTimeout(() => {
+            document.body.removeChild(a);
+            status.textContent = "Download initiated!";
+            setTimeout(() => status.classList.add('hidden'), 3000);
+          }, 100);
+        });
     }
   </script>
-
 </body>
 </html>

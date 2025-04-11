@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Video Downloader</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #f4f6f8;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+    .container {
+      background: #fff;
+      padding: 40px 30px;
+      border-radius: 12px;
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.05);
+      text-align: center;
+      width: 100%;
+      max-width: 400px;
+    }
+    h2 {
+      margin-bottom: 24px;
+      color: #333;
+    }
+    input {
+      width: 100%;
+      padding: 12px;
+      font-size: 16px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      margin-bottom: 16px;
+      transition: border-color 0.2s;
+    }
+    input:focus {
+      outline: none;
+      border-color: #007bff;
+    }
+    button {
+      width: 48%;
+      padding: 12px;
+      font-size: 15px;
+      border: none;
+      border-radius: 6px;
+      margin: 4px;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+    .download {
+      background-color: #007bff;
+      color: white;
+    }
+    .download:hover {
+      background-color: #0056b3;
+    }
+    .refresh {
+      background-color: #e0e0e0;
+      color: #333;
+    }
+    .refresh:hover {
+      background-color: #c7c7c7;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <h2>Video Downloader</h2>
+    <input type="text" id="videoUrl">
+    <div>
+      <button class="download" onclick="downloadVideo()">Download</button>
+      <button class="refresh" onclick="location.reload()">Refresh</button>
+    </div>
+  </div>
+
+  <script>
+    function downloadVideo() {
+      const url = document.getElementById('videoUrl').value.trim();
+      if (!url) {
+        alert("Please enter a video URL.");
+        return;
+      }
+
+      const fileName = decodeURIComponent(url.split('/').pop());
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = fileName;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    }
+  </script>
+
+</body>
+</html>

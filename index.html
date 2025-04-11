@@ -83,15 +83,15 @@
   <script>
     function downloadVideo() {
       const url = document.getElementById('videoUrl').value.trim();
-      if (!url) {
-        alert("Please enter a video URL.");
-        return;
-      }
+      if (!url) return alert("Please enter a video URL.");
 
       const fileName = decodeURIComponent(url.split('/').pop());
+
+      // Create and click a hidden download link
       const a = document.createElement('a');
       a.href = url;
-      a.download = fileName;
+      a.setAttribute('download', fileName);
+      a.setAttribute('style', 'display: none;');
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
